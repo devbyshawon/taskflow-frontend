@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import api from "../services/api";
+import { useAuth } from "../context/AuthContext";
 
 const LoginPage = () => {
     const [formData, setFormData] = useState({ email: '', password: ''});
@@ -8,12 +9,13 @@ const LoginPage = () => {
     const [loading, setLoading] = useState(false);
     const navigate = useNavigate();
 
+    const { token, login } = useAuth();
+
     useEffect (() => {
-        const token = localStorage.getItem('token');
         if (token) {
             navigate('/dashboard')
         }        
-    }, []);
+    }, [token, navigate]);
 
     const handleChange = (e) => {
         setFormData(prev => ({ ...prev, [e.target.name]: e.target.value }));
@@ -25,7 +27,7 @@ const LoginPage = () => {
         setLoading(true);
         try {
             const response = await api.post('/auth/login', formData);
-            localStorage.setItem('token', response.data.token);
+            login(response.data, response.data.token);
             navigate('/dashboard');
         } catch (error) {
             setError(error.response?.data?.message || 'Something went wrong');
