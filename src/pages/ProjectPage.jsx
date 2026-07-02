@@ -22,6 +22,10 @@ const ProjectPage = () => {
     const [editingTask, setEditingTask] = useState(null);
     const [editForm, setEditForm] = useState({ title: '', description: '', assignedTo: '', dueDate: '' });
 
+    const [showMemberForm, setShowMemberForm] = useState(false);
+    const[addingMember, setAddingMember] = useState(false);
+    const [memberEmail, setMemberEmail] = useState('');
+
 
     useEffect (() => {
         const fetchData = async () => {
@@ -157,7 +161,42 @@ const ProjectPage = () => {
         } catch (error) {
             setError(error.response?.data?.message || 'Something went wrong');   
         }
-    }
+    };
+
+    const addMember = async (e) => {
+        e.preventDefault();
+        setError('');
+        if (!memberEmail || memberEmail.trim() === '') {
+            setError('Email is required');
+            return;
+        }
+
+        setAddingMember(true);
+
+        try {
+            const response = await api.post(`/projects/${id}/members`, {email: memberEmail});
+            setProject(response.data);
+            setMemberEmail('');
+            setShowMemberForm(false);
+        } catch (error) {
+            setError(error.response?.data?.message || 'Something went wrong'); 
+        } finally {
+            setAddingMember(false);
+        }
+    };
+
+    const removeMember = async (memberId) => {
+        try {
+            await api.delete(`/projects/${id}/members/${memberId}`);
+            setProject(prev => ({
+                ...prev,
+                members: prev.members.filter(m => m.user._id !== memberId)
+            }))
+        } catch (error) {
+            setError(error.response?.data?.message || 'Something went wrong'); 
+        }
+        
+    };
 
     //prevents the grid from rendering with empty data while the fetch is in flight
     if (loading) return <p className='p-6'>Loading...</p>;
@@ -288,6 +327,48 @@ const ProjectPage = () => {
                 <Column title = 'Done' tasks={doneTasks} onStatusChange={updateTaskStatus} isAdmin={isAdmin} 
                 onEdit={handleEditStart} onDelete={deleteTask} />
             </div>
+
+            {project?.members?.map(member => (
+                <div key={member.user._id}>
+                    <span>
+                        {member.user.name}
+                    </span>
+
+                    <span>
+                        {member.role}
+                    </span>
+                
+                    {isAdmin && member.user._id !== user?._id && (
+                        <button onClick={() => removeMember(member.user._id)}>
+                            Remove
+                        </button>
+                    )}
+                </div>
+            ))}
+
+            {isAdmin && (
+                <div>
+                    <button onClick={() => setShowMemberForm(prev => !prev)}>
+                        {showMemberForm ? 'Cancel' : 'Add Member'}
+                    </button>
+                    {showMemberForm && (
+                        <form onSubmit={addMember}>
+                            <input
+                                type='email'
+                                value={memberEmail}
+                                onChange={(e) => setMemberEmail(e.target.value)}
+                                placeholder='Member email'
+                                className='border px-3 py-2 rounded'
+                            />
+
+                            <button type='submit' disabled={addingMember}>
+                                {addingMember ? 'Adding...' : 'Add Member'}
+                            </button>
+                        </form>
+                    )}
+                </div>
+            )}
+
         </div>
     ) 
 };
