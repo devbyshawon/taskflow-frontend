@@ -3,6 +3,7 @@ import { useParams } from 'react-router-dom';
 import api from '../services/api'
 import Column from '../components/Column';
 import { useAuth } from '../context/AuthContext';
+import { useNavigate } from 'react-router-dom';
 
 
 const ProjectPage = () => {
@@ -25,6 +26,8 @@ const ProjectPage = () => {
     const [showMemberForm, setShowMemberForm] = useState(false);
     const[addingMember, setAddingMember] = useState(false);
     const [memberEmail, setMemberEmail] = useState('');
+
+    const navigate = useNavigate();
 
 
     useEffect (() => {
@@ -202,173 +205,248 @@ const ProjectPage = () => {
     if (loading) return <p className='p-6'>Loading...</p>;
 
     return (
-        <div>
-            {error && <p className='text-red-500 mb-4'>{error}</p>}
+        <div className='min-h-screen bg-gray-100 p-6'>
 
-            <h2>{project?.name}</h2>
+            {error && <p className='text-red-500 text-sm mb-4 bg-red-50 px-3 py-2 rounded-lg'>{error}</p>}
+            
+            <div className='max-w-6xl mx-auto'>
 
-            <button onClick={() => setShowTaskForm(prev => !prev)}>
-                {showTaskForm ? 'Cancel' : 'Add Task'}
-            </button>
-
-            {showTaskForm && (
-                <form onSubmit={handleCreateTasks}>
-                    <div className='mb-4'>
-                        <label className='block text-sm font-medium mb-1'>Title</label>
-                        <input 
-                            type='text'
-                            name='title'
-                            value={newTask.title}
-                            onChange={handleChange}
-                            className='w-full border px-3 py-2 rounded'
-                            placeholder='Task title'
-                        />
-                    </div>
-
-                    <div className='mb-4'>
-                        <label className='block text-sm font-medium mb-1'>Description</label>
-                        <input
-                            type='text'
-                            name='description'
-                            value={newTask.description}
-                            onChange={handleChange}
-                            className='w-full border px-3 py-2 rounded'
-                            placeholder='Task description'
-                        />
-                    </div>
-
-                    <select name='assignedTo' value={newTask.assignedTo} onChange={handleChange}>
-                        <option value=''>Unassigned</option>
-                        {project?.members?.map(member => (
-                            <option key={member.user._id} value={member.user._id}>
-                                {member.user.name}
-                            </option>
-                        ))}
-                    </select>
-
-                    <input
-                        type='date'
-                        name='dueDate'
-                        value={newTask.dueDate}
-                        onChange={handleChange}
-                    />
-
-                    <button
-                        type='submit'
-                        disabled={creating}
-                        className='w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700 disabled:opacity-50'
-                    >
-                        {creating ? 'Creating...' : 'Create'}
-                    </button>  
-                </form>
-            )}
-
-            {editingTask && (
-                <form onSubmit={handleEditSubmit}>
-                    <div className='mb-4'>
-                        <label className='block text-sm font-medium mb-1'>Title</label>
-                        <input 
-                            type='text'
-                            name='title'
-                            value={editForm.title}
-                            onChange={handleEditChange}
-                            className='w-full border px-3 py-2 rounded'
-                            placeholder='Task title'
-                        />
-                    </div>
-
-                    <div className='mb-4'>
-                        <label className='block text-sm font-medium mb-1'>Description</label>
-                        <input
-                            type='text'
-                            name='description'
-                            value={editForm.description}
-                            onChange={handleEditChange}
-                            className='w-full border px-3 py-2 rounded'
-                            placeholder='Task description'
-                        />
-                    </div>
-
-                    <select name='assignedTo' value={editForm.assignedTo} onChange={handleEditChange}>
-                        <option value=''>Unassigned</option>
-                        {project?.members?.map(member => (
-                            <option key={member.user._id} value={member.user._id}>
-                                {member.user.name}
-                            </option>
-                        ))}
-                    </select>
-
-                    <input
-                        type='date'
-                        name='dueDate'
-                        value={editForm.dueDate}
-                        onChange={handleEditChange}
-                    />
-
-                    <button
-                        type='submit'
-                        disabled={updating}
-                        className='w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700 disabled:opacity-50'
-                    >
-                        {updating ? 'Updating...' : 'Save Changes'}
-                    </button>  
-
-                    <button type='button' onClick={() => setEditingTask(null)}>
-                        Cancel
-                    </button>
-                </form>
-            )}            
-
-            <div className='grid grid-cols-3 gap-4'>
-                <Column title = 'To Do' tasks={todoTasks} onStatusChange={updateTaskStatus} isAdmin={isAdmin} 
-                onEdit={handleEditStart} onDelete={deleteTask} />
-                <Column title = 'In Progress' tasks={inProgressTasks} onStatusChange={updateTaskStatus} isAdmin={isAdmin} 
-                onEdit={handleEditStart} onDelete={deleteTask} />
-                <Column title = 'Done' tasks={doneTasks} onStatusChange={updateTaskStatus} isAdmin={isAdmin} 
-                onEdit={handleEditStart} onDelete={deleteTask} />
-            </div>
-
-            {project?.members?.map(member => (
-                <div key={member.user._id}>
-                    <span>
-                        {member.user.name}
-                    </span>
-
-                    <span>
-                        {member.role}
-                    </span>
-                
-                    {isAdmin && member.user._id !== user?._id && (
-                        <button onClick={() => removeMember(member.user._id)}>
-                            Remove
+                <div className='flex justify-between items-center mb-6'>
+                    <h1 className='text-2xl font-bold text-gray-900'>{project?.name}</h1>
+                    {isAdmin && (
+                        <button 
+                            onClick={() => setShowTaskForm(prev => !prev)}
+                            className='bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 text-sm font-medium transition-colors'
+                        >
+                            {showTaskForm ? 'Cancel' : '+ Add Task'}
                         </button>
                     )}
                 </div>
-            ))}
 
-            {isAdmin && (
-                <div>
-                    <button onClick={() => setShowMemberForm(prev => !prev)}>
-                        {showMemberForm ? 'Cancel' : 'Add Member'}
-                    </button>
+                <button 
+                    onClick={() => navigate('/dashboard')}
+                    className='text-sm text-blue-600 hover:underline mb-2 block'
+                >
+                    Back to Dashboard
+                </button>
+
+                {showTaskForm && (
+                    <div className='bg-white rounded-xl shadow-sm p-6 mb-6'>
+                        <h2 className='text-lg font-semibold text-gray-900 mb-4'>Add Task</h2>
+                        <form onSubmit={handleCreateTasks}>
+                            <div className='mb-4'>
+                                <label className='block text-sm font-medium text-gray-700 mb-1'>Title</label>    
+                                <input 
+                                    type='text'
+                                    name='title'
+                                    value={newTask.title}
+                                    onChange={handleChange}
+                                    className='w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500'
+                                    placeholder='Task title'
+                                />
+                            </div>
+
+                            <div className='mb-4'>
+                                <label className='block text-sm font-medium text-gray-700 mb-1'>Description</label>    
+                                <input 
+                                    type='text'                                        
+                                    name='description'
+                                    value={newTask.description}
+                                    onChange={handleChange}
+                                    className='w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500'
+                                    placeholder='Task description'
+                                />
+                            </div>
+
+                            <div className='mb-4'>
+                                <label className='block text-sm font-medium text-gray-700 mb-1'>Assign To</label>
+                                <select 
+                                    name='assignedTo' 
+                                    value={newTask.assignedTo}
+                                    onChange={handleChange}
+                                    className='w-full text-xs border border-gray-200 rounded px-2 py-1 mt-1 bg-white focus:outline-none focus:ring-1 focus:ring-blue-500'
+                                >
+                                    <option value=''>Unassigned</option>
+                                    {project?.members?.map(member => (
+                                        <option key={member.user._id} value={member.user._id}>
+                                            {member.user.name}
+                                        </option> 
+                                    ))}
+                                </select>
+                            </div>
+
+                            <div className='mb-4'>
+                                <label className='block text-sm font-medium text-gray-700 mb-1'>Due Date</label>
+                                <input
+                                    type='date'
+                                    name='dueDate'
+                                    value={newTask.dueDate}
+                                    onChange={handleChange}
+                                    className='w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500'
+                                />
+                            </div>
+
+                            <button
+                                type='submit'
+                                disabled={creating}
+                                className='w-full bg-blue-600 text-white py-2 rounded-lg font-medium hover:bg-blue-700 disabled:opacity-50 transition-colors'
+                            >
+                                {creating ? 'Creating...' : 'Create'}
+                            </button>
+
+                            </form>
+                    </div>    
+                )}                   
+                     
+                {editingTask && (
+                    <div className='bg-white rounded-xl shadow-sm p-6 mb-6'>
+                        <h2 className='text-lg font-semibold text-gray-900 mb-4'>Edit Task</h2>
+                        <form onSubmit={handleEditSubmit}>
+                            <div className='mb-4'>
+                                <label className='block text-sm font-medium text-gray-700 mb-1'>Title</label>
+                                <input 
+                                    type='text'
+                                    name='title'
+                                    value={editForm.title}
+                                    onChange={handleEditChange}
+                                    className='w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500'
+                                    placeholder='Task title'
+                                />
+                            </div>
+
+                            <div className='mb-4'>
+                                <label className='block text-sm font-medium text-gray-700 mb-1'>Description</label>
+                                <input
+                                    type='text'
+                                    name='description'
+                                    value={editForm.description}
+                                    onChange={handleEditChange}
+                                    className='w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500'
+                                    placeholder='Task description'
+                                />
+                            </div>
+
+                            <div className='mb-4'>
+                                <label className='block text-sm font-medium text-gray-700 mb-1'>Assign To</label>
+                                <select 
+                                    name='assignedTo' 
+                                    value={editForm.assignedTo} 
+                                    onChange={handleEditChange}
+                                    className='w-full text-xs border border-gray-200 rounded px-2 py-1 mt-1 bg-white focus:outline-none focus:ring-1 focus:ring-blue-500'
+                                >
+                                    <option value=''>Unassigned</option>
+                                    {project?.members?.map(member => (
+                                        <option key={member.user._id} value={member.user._id}>
+                                            {member.user.name}
+                                        </option>
+                                    ))}
+                                </select>
+                            </div>
+
+                            <div className='mb-4'>
+                                <label className='block text-sm font-medium text-gray-700 mb-1'>Due Date</label>
+                                <input
+                                    type='date'
+                                    name='dueDate'
+                                    value={editForm.dueDate}
+                                    onChange={handleEditChange}
+                                    className='w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500'
+                                />
+                            </div>
+
+                            <button
+                                type='submit'
+                                disabled={updating}
+                                className='w-full bg-blue-600 text-white py-2 rounded-lg font-medium hover:bg-blue-700 disabled:opacity-50 transition-colors'
+                            >
+                                {updating ? 'Updating...' : 'Save Changes'}
+                            </button>
+
+                            <button type='button' onClick={() => setEditingTask(null)}>
+                                Cancel
+                            </button>
+
+                        </form>
+                    </div>    
+                )}
+                
+                <div className='grid grid-cols-3 gap-4 mb-8'>
+                    <Column title = 'To Do' tasks={todoTasks} onStatusChange={updateTaskStatus} isAdmin={isAdmin} 
+                    onEdit={handleEditStart} onDelete={deleteTask} />
+                    <Column title = 'In Progress' tasks={inProgressTasks} onStatusChange={updateTaskStatus} isAdmin={isAdmin} 
+                    onEdit={handleEditStart} onDelete={deleteTask} />
+                    <Column title = 'Done' tasks={doneTasks} onStatusChange={updateTaskStatus} isAdmin={isAdmin} 
+                    onEdit={handleEditStart} onDelete={deleteTask} />
+                </div>
+
+                <div className='bg-white rounded-xl shadow-sm p-6 mt-6'>
+                    <div className='flex justify-between items-center mb-4'>
+                        <h2 className='text-lg font-semibold text-gray-900'>Members</h2>
+                        {isAdmin && (
+                            <button 
+                                onClick={() => setShowMemberForm(prev => !prev)}
+                                className='text-sm text-blue-600 hover:underline'
+                            >
+                                {showMemberForm ? 'Cancel' : '+ Add Member'}
+                            </button>
+                        )}
+                    </div>
+
                     {showMemberForm && (
-                        <form onSubmit={addMember}>
+                        <form onSubmit={addMember} className='flex gap-2 mb-4'>
                             <input
                                 type='email'
                                 value={memberEmail}
                                 onChange={(e) => setMemberEmail(e.target.value)}
                                 placeholder='Member email'
-                                className='border px-3 py-2 rounded'
+                                className='flex-1 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500'
                             />
 
-                            <button type='submit' disabled={addingMember}>
+                            <button 
+                                type='submit' 
+                                disabled={addingMember}
+                                className='bg-blue-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-blue-700 disabled:opacity-50 transition-colors'
+                            >
                                 {addingMember ? 'Adding...' : 'Add Member'}
                             </button>
                         </form>
                     )}
-                </div>
-            )}
 
+                    {project?.members?.map(member => (
+                        <div 
+                            key={member.user._id}
+                            className='flex items-center justify-between py-2 border-b border-gray-100 last:border-0'
+                        >
+
+                            <div className='flex items-center gap-2'>
+
+                                <span className='text-sm font-medium text-gray-900'>
+                                    {member.user.name}    
+                                </span>
+
+                                <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${
+                                    member.role === 'admin'
+                                    ? 'bg-blue-100 text-blue-700'
+                                    : 'bg-gray-100 text-gray-500'
+                                }`}>
+                                    {member.role}
+                                </span>
+                            </div>
+
+                            {isAdmin && member.user._id !== user?._id && (
+                                <button 
+                                    onClick={() => removeMember(member.user._id)}
+                                    className='text-xs text-red-500 hover:underline'
+                                >
+                                    Remove
+                                </button>
+                            )}
+                        </div>
+                    ))}
+                </div>
+
+
+            </div>
         </div>
     ) 
 };
