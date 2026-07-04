@@ -13,7 +13,10 @@ const ProjectPage = () => {
     const [project, setProject] = useState(null);
     const [tasks, setTasks] = useState([]);
     const [loading, setLoading] = useState(false);
-    const [error, setError] = useState('');
+    const [pageError, setPageError] = useState('');
+    const [taskFormError, setTaskFormError] = useState('');
+    const [editFormError, setEditFormError] = useState('');
+    const [memberFormError, setMemberFormError] = useState('');
 
     const [showTaskForm, setShowTaskForm] = useState(false);
     const [newTask, setNewTask] = useState({ title: '', description: '', assignedTo: '', dueDate: '' });
@@ -41,7 +44,7 @@ const ProjectPage = () => {
                 setProject(projectData.data);
                 setTasks(tasksData.data);
             } catch (error) {
-                setError(error.response?.data?.message || 'Failed to load tasks');   
+                setPageError(error.response?.data?.message || 'Failed to load tasks');   
             } finally {
                 setLoading(false);
             }
@@ -62,9 +65,9 @@ const ProjectPage = () => {
 
     const handleCreateTasks = async (e) => {
         e.preventDefault();
-        setError('');
+        setTaskFormError('');
         if (!newTask.title.trim()) {
-            setError('Task title is required');
+            setTaskFormError('Task title is required');
             return;
         }
         setCreating(true);
@@ -84,7 +87,7 @@ const ProjectPage = () => {
             setNewTask({ title: '', description: '', assignedTo: '', dueDate: '' });
             setShowTaskForm(false);
         } catch (error) {
-            setError(error.response?.data?.message || 'Something went wrong');
+            setTaskFormError(error.response?.data?.message || 'Something went wrong');
         } finally {
             setCreating(false);
         }
@@ -108,7 +111,7 @@ const ProjectPage = () => {
 
                 }))
         } catch (error) {
-            setError(error.response?.data?.message || 'Something went wrong');
+            setPageError(error.response?.data?.message || 'Something went wrong');
         }
         
     };
@@ -121,9 +124,9 @@ const ProjectPage = () => {
 
     const handleEditSubmit = async (e) => {
         e.preventDefault();
-        setError('');
+        setEditFormError('');
         if (editForm.title.trim() === '') {
-            setError('Task title is required')
+            setEditFormError('Task title is required')
             return;
         }
         setUpdating(true) 
@@ -142,7 +145,7 @@ const ProjectPage = () => {
             setTasks(prev => prev.map(t => t._id === editingTask._id ? response.data : t));
             setEditingTask(null)
         } catch (error) {
-            setError(error.response?.data?.message || 'Something went wrong');
+            setEditFormError(error.response?.data?.message || 'Something went wrong');
         } finally {
             setUpdating(false)
         }
@@ -162,15 +165,21 @@ const ProjectPage = () => {
 
             setTasks(prev => prev.filter(t => t._id !== taskId));
         } catch (error) {
-            setError(error.response?.data?.message || 'Something went wrong');   
+            setPageError(error.response?.data?.message || 'Something went wrong');   
         }
     };
 
     const addMember = async (e) => {
         e.preventDefault();
-        setError('');
+        setMemberFormError('');
         if (!memberEmail || memberEmail.trim() === '') {
-            setError('Email is required');
+            setMemberFormError('Email is required');
+            return;
+        }
+
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(memberEmail)) {
+            setMemberFormError('Please enter a valid email address');
             return;
         }
 
@@ -182,7 +191,7 @@ const ProjectPage = () => {
             setMemberEmail('');
             setShowMemberForm(false);
         } catch (error) {
-            setError(error.response?.data?.message || 'Something went wrong'); 
+            setMemberFormError(error.response?.data?.message || 'Something went wrong'); 
         } finally {
             setAddingMember(false);
         }
@@ -196,7 +205,7 @@ const ProjectPage = () => {
                 members: prev.members.filter(m => m.user._id !== memberId)
             }))
         } catch (error) {
-            setError(error.response?.data?.message || 'Something went wrong'); 
+            setPageError(error.response?.data?.message || 'Something went wrong'); 
         }
         
     };
@@ -207,7 +216,7 @@ const ProjectPage = () => {
     return (
         <div className='min-h-screen bg-gray-100 p-6'>
 
-            {error && <p className='text-red-500 text-sm mb-4 bg-red-50 px-3 py-2 rounded-lg'>{error}</p>}
+            {pageError && <p className='text-red-500 text-sm mb-4 bg-red-50 px-3 py-2 rounded-lg'>{pageError}</p>}
             
             <div className='max-w-6xl mx-auto'>
 
@@ -215,7 +224,15 @@ const ProjectPage = () => {
                     <h1 className='text-2xl font-bold text-gray-900'>{project?.name}</h1>
                     {isAdmin && (
                         <button 
-                            onClick={() => setShowTaskForm(prev => !prev)}
+                        onClick={() => {
+                            if (showTaskForm) {
+                                setShowTaskForm(false);
+                                setTaskFormError('');
+                                setNewTask({ title: '', description: '', assignedTo: '', dueDate: '' });
+                            } else {
+                                setShowTaskForm(true);
+                            }
+                        }}
                             className='bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 text-sm font-medium transition-colors'
                         >
                             {showTaskForm ? 'Cancel' : '+ Add Task'}
@@ -264,7 +281,7 @@ const ProjectPage = () => {
                                     name='assignedTo' 
                                     value={newTask.assignedTo}
                                     onChange={handleChange}
-                                    className='w-full text-xs border border-gray-200 rounded px-2 py-1 mt-1 bg-white focus:outline-none focus:ring-1 focus:ring-blue-500'
+                                    className='w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500'
                                 >
                                     <option value=''>Unassigned</option>
                                     {project?.members?.map(member => (
@@ -285,6 +302,8 @@ const ProjectPage = () => {
                                     className='w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500'
                                 />
                             </div>
+
+                            {taskFormError && <p className='text-red-500 text-sm mb-4 bg-red-50 px-3 py-2 rounded-lg'>{taskFormError}</p>}
 
                             <button
                                 type='submit'
@@ -354,6 +373,8 @@ const ProjectPage = () => {
                                 />
                             </div>
 
+                            {editFormError && <p className='text-red-500 text-sm mb-4 bg-red-50 px-3 py-2 rounded-lg'>{editFormError}</p>}
+
                             <button
                                 type='submit'
                                 disabled={updating}
@@ -362,7 +383,12 @@ const ProjectPage = () => {
                                 {updating ? 'Updating...' : 'Save Changes'}
                             </button>
 
-                            <button type='button' onClick={() => setEditingTask(null)}>
+                            <button 
+                                type='button' 
+                                onClick={() => { 
+                                    setEditingTask(null);
+                                    setEditFormError(''); }}
+                            >
                                 Cancel
                             </button>
 
@@ -395,7 +421,7 @@ const ProjectPage = () => {
                     {showMemberForm && (
                         <form onSubmit={addMember} className='flex gap-2 mb-4'>
                             <input
-                                type='email'
+                                type='text'
                                 value={memberEmail}
                                 onChange={(e) => setMemberEmail(e.target.value)}
                                 placeholder='Member email'
@@ -409,8 +435,19 @@ const ProjectPage = () => {
                             >
                                 {addingMember ? 'Adding...' : 'Add Member'}
                             </button>
+
+                            <button onClick={() => { 
+                                setShowMemberForm(false); 
+                                setMemberFormError(''); 
+                                setMemberEmail(''); 
+                            }}>
+                                Cancel
+                            </button>
+
                         </form>
                     )}
+
+                    {memberFormError && <p className='text-red-500 text-sm mb-4 bg-red-50 px-3 py-2 rounded-lg'>{memberFormError}</p>}
 
                     {project?.members?.map(member => (
                         <div 

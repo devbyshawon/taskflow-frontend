@@ -15,6 +15,25 @@ const SignupPage = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         setError('');
+
+        const { name, email, password } = formData;
+
+        if (!name || !email || !password){
+            setError('All fields are required');
+            return;
+        }
+
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(email)) {
+            setError('Please enter a valid email address');
+            return;
+        }
+
+        if (password.length < 6) {
+            setError('Password must be at least 6 characters');
+            return;
+        }
+        
         setLoading(true);
         try {
             await api.post('/auth/signup', formData);
@@ -49,7 +68,7 @@ const SignupPage = () => {
                     <div className='mb-4'>
                         <label className='block text-sm font-medium text-gray-700 mb-1'>Email</label>
                         <input 
-                            type='email' 
+                            type='text' 
                             name='email' 
                             value={formData.email} 
                             onChange={handleChange}

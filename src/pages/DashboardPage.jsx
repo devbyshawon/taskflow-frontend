@@ -12,6 +12,8 @@ const DashboardPage = () => {
     const [newProject, setNewProject] = useState({ name: '', description: '' });
     const [creating, setCreating] = useState(false);
 
+    const [formError, setFormError] = useState('');
+
     useEffect (() => {
         const fetchProjects = async () => {
             try {
@@ -30,9 +32,9 @@ const DashboardPage = () => {
 
     const handleCreateProject = async (e) => {
         e.preventDefault();
-        setError('');
+        setFormError('');
         if (!newProject.name.trim()) {
-            setError('Project name is required');
+            setFormError('Project name is required');
             return;
         }
         setCreating(true);
@@ -60,6 +62,16 @@ const DashboardPage = () => {
                 <div className='flex justify-between items-center mb-6'>
                     <h1 className='text-2xl font-bold text-gray-900'>My Projects</h1>
                     <button 
+                        onClick={() => {
+                            if (showForm) {
+                                setShowForm(false);
+                                setFormError('');
+                                setNewProject({ name: '', description: '' });
+                            } else {
+                                setShowForm(true);
+                            }
+                        }}
+
                         onClick={() => setShowForm(prev => !prev)} 
                         className='bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium'
                     >
@@ -96,6 +108,9 @@ const DashboardPage = () => {
                             />
                         </div>
 
+                        {formError && (
+                            <p className='text-red-500 text-sm mb-4 bg-red-50 px-3 py-2 rounded-lg'>{formError}</p>
+                        )}
                         <button
                             type='submit'
                             disabled={creating}

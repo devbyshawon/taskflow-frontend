@@ -24,6 +24,20 @@ const LoginPage = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         setError('');
+
+        const { email, password } = formData;
+
+        if ( !email || !password){
+            setError('All fields are required');
+            return;
+        }
+
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(email)) {
+            setError('Please enter a valid email address');
+            return;
+        }
+
         setLoading(true);
         try {
             const response = await api.post('/auth/login', formData);
