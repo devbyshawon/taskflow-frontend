@@ -1,10 +1,8 @@
 import { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import api from '../services/api'
 import Column from '../components/Column';
 import { useAuth } from '../context/AuthContext';
-import { useNavigate } from 'react-router-dom';
-
 
 const ProjectPage = () => {
     const {id} = useParams();
@@ -161,7 +159,7 @@ const ProjectPage = () => {
             const result = window.confirm("Delete this task?");
             if (!result) return;
 
-            const response = await api.delete(`/tasks/${taskId}`);
+            await api.delete(`/tasks/${taskId}`);
 
             setTasks(prev => prev.filter(t => t._id !== taskId));
         } catch (error) {
@@ -217,7 +215,6 @@ const ProjectPage = () => {
         
     };
 
-    //prevents the grid from rendering with empty data while the fetch is in flight
     if (loading) return <p className='p-6'>Loading...</p>;
 
     return (
@@ -240,7 +237,7 @@ const ProjectPage = () => {
                                 setShowTaskForm(true);
                             }
                         }}
-                            className='bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 text-sm font-medium transition-colors'
+                        className='bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 text-sm font-medium transition-colors'
                         >
                             {showTaskForm ? 'Cancel' : '+ Add Task'}
                         </button>
@@ -320,7 +317,7 @@ const ProjectPage = () => {
                                 {creating ? 'Creating...' : 'Create'}
                             </button>
 
-                            </form>
+                        </form>
                     </div>    
                 )}                   
                      
@@ -496,8 +493,6 @@ const ProjectPage = () => {
                         </div>
                     ))}
                 </div>
-
-
             </div>
         </div>
     ) 

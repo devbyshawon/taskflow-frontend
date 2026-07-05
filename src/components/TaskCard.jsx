@@ -12,8 +12,8 @@ const TaskCard = ({ task, onStatusChange, isAdmin, onEdit, onDelete }) => {
     }
 
     return (
-    <div className='bg-gray-50 rounded-lg p-3 mb-2 border border-gray-100'>
-        <h4 className='font-medium text-gray-900 text-sm mb-1'>{task.title}</h4>
+        <div className='bg-gray-50 rounded-lg p-3 mb-2 border border-gray-100'>
+            <h4 className='font-medium text-gray-900 text-sm mb-1'>{task.title}</h4>
 
             {task.description && (
                 <p className='text-xs text-gray-500 mb-2'>
@@ -29,7 +29,7 @@ const TaskCard = ({ task, onStatusChange, isAdmin, onEdit, onDelete }) => {
 
             {task.dueDate && (
                 <p className='text-xs text-gray-400 mb-2'>
-                    📅  {new Date(task.dueDate).toLocaleDateString()}
+                    📅 {new Date(task.dueDate).toLocaleDateString()}
                 </p>
             )}
 

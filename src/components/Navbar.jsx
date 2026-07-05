@@ -11,23 +11,19 @@ const Navbar = () => {
     }
     return (
         <nav className='bg-white border-b border-gray-200 px-6 py-4 flex justify-between items-center'>
-            
-            {/* Left side - app name */}
+
             <div className='text-xl font-bold text-blue-600 cursor-pointer'
                 onClick={() => navigate('/dashboard')}
             >
                 TaskFlow
             </div>
 
-            {/* Right side - only show if user exists */}
             {user && (
                 <div className='flex items-center gap-4'>
-                    {/* show user.name here */}
                     <span className='text-sm text-gray-600 font-medium'>
                         Hi, {user.name}
                     </span>
 
-                    {/* show logout button here */}
                     <button 
                         onClick={handleLogout}
                         className='text-sm bg-red-500 text-white px-4 py-1.5 rounded-lg hover:bg-red-600 transition-colors'
