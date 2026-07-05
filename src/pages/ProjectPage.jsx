@@ -203,7 +203,14 @@ const ProjectPage = () => {
             setProject(prev => ({
                 ...prev,
                 members: prev.members.filter(m => m.user._id !== memberId)
-            }))
+            }));
+
+            setTasks(prev => prev.map(task => {
+                if (task.assignedTo && task.assignedTo._id === memberId) {
+                    return { ...task, assignedTo: null };
+                }
+                return task;
+            }));
         } catch (error) {
             setPageError(error.response?.data?.message || 'Something went wrong'); 
         }
@@ -388,6 +395,7 @@ const ProjectPage = () => {
                                 onClick={() => { 
                                     setEditingTask(null);
                                     setEditFormError(''); }}
+                                    className='text-sm text-blue-600 hover:underline mt-3'
                             >
                                 Cancel
                             </button>
@@ -396,7 +404,7 @@ const ProjectPage = () => {
                     </div>    
                 )}
                 
-                <div className='grid grid-cols-3 gap-4 mb-8'>
+                <div className='grid grid-cols-1 md:grid-cols-3 gap-4 mb-8'>
                     <Column title = 'To Do' tasks={todoTasks} onStatusChange={updateTaskStatus} isAdmin={isAdmin} 
                     onEdit={handleEditStart} onDelete={deleteTask} />
                     <Column title = 'In Progress' tasks={inProgressTasks} onStatusChange={updateTaskStatus} isAdmin={isAdmin} 
@@ -408,46 +416,53 @@ const ProjectPage = () => {
                 <div className='bg-white rounded-xl shadow-sm p-6 mt-6'>
                     <div className='flex justify-between items-center mb-4'>
                         <h2 className='text-lg font-semibold text-gray-900'>Members</h2>
-                        {isAdmin && (
+                        {isAdmin && !showMemberForm && (
                             <button 
-                                onClick={() => setShowMemberForm(prev => !prev)}
+                                onClick={() => setShowMemberForm(true)}
                                 className='text-sm text-blue-600 hover:underline'
                             >
-                                {showMemberForm ? 'Cancel' : '+ Add Member'}
+                                + Add Member
                             </button>
                         )}
                     </div>
 
                     {showMemberForm && (
-                        <form onSubmit={addMember} className='flex gap-2 mb-4'>
-                            <input
-                                type='text'
-                                value={memberEmail}
-                                onChange={(e) => setMemberEmail(e.target.value)}
-                                placeholder='Member email'
-                                className='flex-1 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500'
-                            />
+                        <div className='bg-white rounded-xl shadow-sm p-6 mb-6'>
+                            <h2 className='text-lg font-semibold text-gray-900 mb-4'>Add Member</h2>
+
+                            {memberFormError && <p className='text-red-500 text-sm mb-4 bg-red-50 px-3 py-2 rounded-lg'>{memberFormError}</p>}
+
+                            <form onSubmit={addMember} className='flex flex-col sm:flex-row gap-2 mb-4'>
+                                <input
+                                    type='text'
+                                    value={memberEmail}
+                                    onChange={(e) => setMemberEmail(e.target.value)}
+                                    placeholder='Member email'
+                                    className='flex-1 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500'
+                                />
+
+                                <button
+                                    type='submit' 
+                                    disabled={addingMember}
+                                    className='bg-blue-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-blue-700 disabled:opacity-50 transition-colors'                        
+                                >
+                                    {addingMember ? 'Adding...' : 'Add Member'}
+                                </button>
+                            </form>
 
                             <button 
-                                type='submit' 
-                                disabled={addingMember}
-                                className='bg-blue-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-blue-700 disabled:opacity-50 transition-colors'
+                                type='button'
+                                onClick={() => {
+                                    setShowMemberForm(false);
+                                    setMemberFormError('');
+                                    setMemberEmail('');
+                                }}
+                                className='text-sm text-blue-600 hover:underline'
                             >
-                                {addingMember ? 'Adding...' : 'Add Member'}
-                            </button>
-
-                            <button onClick={() => { 
-                                setShowMemberForm(false); 
-                                setMemberFormError(''); 
-                                setMemberEmail(''); 
-                            }}>
                                 Cancel
                             </button>
-
-                        </form>
+                        </div>
                     )}
-
-                    {memberFormError && <p className='text-red-500 text-sm mb-4 bg-red-50 px-3 py-2 rounded-lg'>{memberFormError}</p>}
 
                     {project?.members?.map(member => (
                         <div 
