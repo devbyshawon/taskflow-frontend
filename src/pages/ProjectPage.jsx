@@ -116,7 +116,7 @@ const ProjectPage = () => {
 
     const handleEditStart = (task) => {
         setEditingTask(task);
-        setEditForm({ title: task.title, description: task.description,
+        setEditForm({ title: task.title, description: task.description || '',
              assignedTo: task.assignedTo?._id || '', dueDate: task.dueDate ? task.dueDate.split('T')[0] : ''});
     }
 
@@ -130,13 +130,7 @@ const ProjectPage = () => {
         setUpdating(true) 
 
         const { title, description, assignedTo, dueDate } = editForm;
-        const body = { title, description };
-        if (assignedTo) {
-            body.assignedTo = assignedTo;
-        }
-        if (dueDate) {
-            body.dueDate = dueDate;
-        }
+        const body = { title, description, assignedTo: assignedTo || null, dueDate: dueDate || null };
 
         try {
             const response = await api.put(`/tasks/${editingTask._id}`, body);
