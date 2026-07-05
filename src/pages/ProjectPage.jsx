@@ -141,7 +141,7 @@ const ProjectPage = () => {
         try {
             const response = await api.put(`/tasks/${editingTask._id}`, body);
             setTasks(prev => prev.map(t => t._id === editingTask._id ? response.data : t));
-            setEditingTask(null)
+            setEditingTask(null);
         } catch (error) {
             setEditFormError(error.response?.data?.message || 'Something went wrong');
         } finally {
@@ -157,8 +157,10 @@ const ProjectPage = () => {
     const deleteTask = async (taskId) => {
         try {
             const result = window.confirm("Delete this task?");
-            if (!result) return;
-
+            if (!result) {
+                return;
+            }
+            
             await api.delete(`/tasks/${taskId}`);
 
             setTasks(prev => prev.filter(t => t._id !== taskId));
