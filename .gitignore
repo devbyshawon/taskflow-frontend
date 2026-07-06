@@ -23,6 +23,5 @@ dist-ssr
 *.sln
 *.sw?
 
-README.md
 progress.md
 notes.md
