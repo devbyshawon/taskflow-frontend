@@ -118,6 +118,7 @@ const ProjectPage = () => {
         setEditingTask(task);
         setEditForm({ title: task.title, description: task.description || '',
              assignedTo: task.assignedTo?._id || '', dueDate: task.dueDate ? task.dueDate.split('T')[0] : ''});
+        window.scrollTo({ top: 0, behavior: 'smooth' });    
     }
 
     const handleEditSubmit = async (e) => {

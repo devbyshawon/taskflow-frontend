@@ -67,6 +67,7 @@ const DashboardPage = () => {
     const handleEditStart = (project) => {
         setEditingProject(project);
         setEditForm({ name: project.name, description: project.description || '' });
+        window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
     const handleEditSubmit = async (e) => {
