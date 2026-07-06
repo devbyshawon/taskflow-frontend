@@ -18,8 +18,6 @@
 
 ## Screenshots
 
-> *(Add your screenshots here after taking them from the live site)*
-> 
 > ![Login Page](./screenshots/login.png)
 > ![Dashboard](./screenshots/dashboard.png)
 > ![Project Detail](./screenshots/project-detail.png)
