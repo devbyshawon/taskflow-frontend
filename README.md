@@ -186,7 +186,7 @@ The full API documentation is available in the [backend repository](https://gith
 
 **MD. Shawon Hossain (Arham)**  
 Final-year CSE Student, BRAC University  
-[GitHub](https://github.com/devbyshawon) · [LinkedIn](https://www.linkedin.com/in/devbyshawon/)
+[GitHub](https://github.com/devbyshawon) · [LinkedIn](https://www.linkedin.com/in/devbyshawon-/)
 
 ---
 
